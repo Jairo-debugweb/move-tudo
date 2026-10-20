@@ -95,4 +95,11 @@
   });
 
   renderOrders();
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(error => {
+        console.info("Move Tudo: modo offline não foi ativado.", error);
+      });
+    });
+  }
 })();
