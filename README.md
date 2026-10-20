@@ -2,50 +2,66 @@
 
 **Pequenos fretes e mudanças, sem complicação.**
 
-O Move Tudo é uma plataforma em construção para aproximar pessoas que precisam transportar móveis, eletrodomésticos, caixas e itens de pequenas mudanças de profissionais que realizam fretes locais.
+O Move Tudo está sendo desenvolvido para aproximar pessoas que precisam transportar móveis, eletrodomésticos, caixas e itens de pequenas mudanças de profissionais que realizam fretes locais.
 
-## Problema que queremos resolver
+## Funcionalidades preparadas
 
-Encontrar alguém para levar um único móvel ou fazer uma pequena mudança ainda pode exigir procurar indicações pessoalmente. A proposta é facilitar a solicitação, organizar os detalhes do transporte e, nas próximas etapas, ajudar o cliente a encontrar profissionais disponíveis.
+- Página responsiva para celular e computador.
+- Formulário de solicitação com origem, destino, distância, data e tipo de carga.
+- Estimativa ilustrativa de preço (não é cotação real).
+- Histórico local de pedidos no navegador.
+- Interface de cadastro para clientes e motoristas.
+- Login e cadastro via Supabase Auth, ativados depois da configuração do projeto.
+- Estrutura SQL inicial para perfis, solicitações e propostas com Row Level Security (RLS).
 
-## O que existe nesta primeira versão
+## Configurar cadastro e login com Supabase
 
-- Página inicial responsiva para celular e computador.
-- Explicação de como a plataforma deverá funcionar.
-- Formulário para registrar tipo de carga, origem, destino, data e contato.
-- Lista dos pedidos guardados localmente no navegador.
-- Validação básica de campos e escape de texto exibido na página.
+**A autenticação não funcionará até concluir estes passos.** O arquivo `supabase-config.js` contém valores de exemplo, não credenciais reais.
 
-## Como testar
+1. Crie um projeto no [Supabase](https://supabase.com/).
+2. No painel do projeto, abra as configurações da API e copie a **Project URL** e a **publishable key** (ou a chave pública anon legada, se for a opção disponível).
+3. Edite `supabase-config.js` e substitua `https://SEU-PROJETO.supabase.co` pela Project URL e `SUA_CHAVE_PUBLICA_ANON` pela chave pública.
+4. No painel do Supabase, abra **SQL Editor**, crie uma consulta e execute todo o conteúdo de `supabase/schema.sql`.
+5. Em **Authentication → URL Configuration**, configure a URL principal do site publicado e adicione a URL do site à lista de redirecionamentos permitidos. Se o GitHub Pages ainda não estiver publicado, conclua essa configuração quando ele estiver disponível.
+6. Publique as alterações e teste o cadastro com um e-mail seu. Se a confirmação de e-mail estiver habilitada, abra o e-mail de confirmação antes de tentar entrar.
 
-1. Abra `index.html` no navegador ou publique o repositório com o GitHub Pages.
-2. Vá até **Pedir frete** e preencha o formulário.
-3. Salve o pedido e confira a seção **Seus pedidos**.
+### Segurança
 
-## Limitações importantes
+- Use somente a chave pública/publishable no frontend. **Nunca** coloque a chave `service_role`, senha do banco ou segredos privados no GitHub.
+- O banco usa políticas RLS para limitar perfis e solicitações.
+- A seleção do perfil motorista ainda não comprova identidade, documentos, veículo ou seguro. A verificação dos profissionais precisa ser implementada antes do lançamento.
+- Não use dados pessoais reais até que as configurações de segurança, privacidade e acesso estejam revisadas.
+- Antes de um lançamento público, o esquema e as políticas precisam passar por revisão e testes de segurança.
 
-Esta etapa é somente um protótipo de interface com armazenamento local no navegador. Os pedidos **não** são enviados para uma central nem ficam disponíveis em outros celulares. Ainda não existem cadastro/login, banco de dados, localização em mapa, notificações, chat, pagamentos, verificação de profissionais ou cotações automáticas. Não use dados pessoais reais neste protótipo.
+## O que ainda não está conectado
 
-## Próximas etapas sugeridas
+- O formulário de frete ainda salva os pedidos apenas no navegador. Ele ainda não grava em `freight_requests`.
+- O painel de motorista ainda não lista pedidos do banco nem envia propostas.
+- Não existem ainda redefinição de senha personalizada, notificações, chat, mapas, pagamentos ou verificação de profissionais.
+- A faixa de preço é demonstrativa; não representa pesquisa de mercado ou orçamento de um motorista.
 
-1. Definir o fluxo do cliente e do profissional de frete.
-2. Implementar backend e banco de dados com regras de acesso.
-3. Criar cadastro, autenticação e perfis de usuários.
-4. Fazer o pedido chegar aos profissionais e permitir propostas de preço.
-5. Adicionar acompanhamento do pedido, avaliações e mecanismos de segurança.
-6. Testar em celulares e preparar a publicação.
+## Testar a versão local
+
+Abra `index.html` por um servidor web local ou publique com GitHub Pages. Para testar módulos JavaScript e autenticação, use um servidor HTTP/HTTPS; abrir o HTML diretamente por `file://` pode bloquear módulos.
 
 ## Estrutura
 
-- `index.html` — estrutura e conteúdo da página.
-- `styles.css` — visual e layout responsivo.
-- `app.js` — validação do formulário e armazenamento local.
-- `.gitignore` — arquivos locais que não devem ser versionados.
+- `index.html` — página e formulários.
+- `styles.css` — visual responsivo.
+- `app.js` — estimativa ilustrativa e armazenamento local de pedidos.
+- `auth.js` — interface de cadastro/login conectada ao Supabase quando configurado.
+- `supabase-config.js` — URL e chave pública do Supabase.
+- `supabase/schema.sql` — tabelas e políticas RLS.
+- `manifest.webmanifest`, `sw.js`, `icons/` — suporte básico a instalação/offline.
 
-## Privacidade e segurança
+## Próximas etapas
 
-Não inclua senhas, tokens, chaves privadas ou credenciais no repositório. Antes de lançar o serviço, será necessário definir como os dados de contato e os endereços serão armazenados, protegidos e apagados.
+1. Configurar e testar Supabase Auth.
+2. Conectar o formulário de pedidos ao banco compartilhado.
+3. Criar o painel do motorista e o envio de propostas.
+4. Permitir que o cliente compare e aceite uma proposta com regras seguras.
+5. Testar em dispositivos reais e preparar o lançamento.
 
 ---
 
-Projeto em fase inicial. O objetivo é evoluir por etapas, validando a experiência antes de conectar serviços reais.
+Projeto em desenvolvimento. Não está pronto para operação comercial nem para receber pagamentos.
