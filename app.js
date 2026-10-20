@@ -8,6 +8,11 @@
   const ordersList = document.querySelector("#orders-list");
   const clearButton = document.querySelector("#clear-orders");
   const dateInput = document.querySelector("#date");
+  const cargoInput = document.querySelector("#cargo");
+  const distanceInput = document.querySelector("#distance");
+  const requestModeInput = document.querySelector("#request-mode");
+  const estimatePanel = document.querySelector("#estimate-panel");
+  const estimateValue = document.querySelector("#estimate-value");
 
   document.querySelector("#year").textContent = String(new Date().getFullYear());
 
@@ -37,6 +42,32 @@
     return day && month && year ? `${day}/${month}/${year}` : value;
   }
 
+  function calculateEstimate() {
+    const distance = Number(distanceInput.value);
+    const cargo = cargoInput.value;
+    if (!distance || distance < 1 || !cargo) {
+      estimatePanel.hidden = true;
+      return null;
+    }
+
+    // Faixa demonstrativa para testar a experiência. Não representa preço de mercado.
+    const cargoFactors = {
+      "Móveis e eletrodomésticos": 1.15,
+      "Pequena mudança": 1.55,
+      "Caixas e objetos": 1,
+      "Material de construção": 1.3,
+      "Outro tipo de carga": 1.2
+    };
+    const base = 35;
+    const perKm = 3.2;
+    const factor = cargoFactors[cargo] || 1.2;
+    const low = Math.round((base + distance * perKm) * factor / 5) * 5;
+    const high = Math.round((low * 1.3) / 5) * 5;
+    estimatePanel.hidden = requestModeInput.value !== "estimate_and_quotes";
+    estimateValue.textContent = `${low.toLocaleString("pt-BR", {style:"currency",currency:"BRL",maximumFractionDigits:0})} a ${high.toLocaleString("pt-BR", {style:"currency",currency:"BRL",maximumFractionDigits:0})}`;
+    return { low, high };
+  }
+
   function renderOrders() {
     const orders = getOrders();
     savedSection.hidden = orders.length === 0;
@@ -46,8 +77,11 @@
           <h3>${escapeHtml(order.cargo)}</h3>
           <p><strong>Retirada:</strong> ${escapeHtml(order.origin)}</p>
           <p><strong>Entrega:</strong> ${escapeHtml(order.destination)}</p>
-          <p><strong>Data:</strong> ${escapeHtml(formatDate(order.date))} · <strong>Contato:</strong> ${escapeHtml(order.phone)}</p>
+          <p><strong>Distância estimada:</strong> ${escapeHtml(order.distance)} km · <strong>Data:</strong> ${escapeHtml(formatDate(order.date))}</p>
+          <p><strong>Contato:</strong> ${escapeHtml(order.phone)}</p>
           ${order.details ? `<p><strong>Detalhes:</strong> ${escapeHtml(order.details)}</p>` : ""}
+          <p><strong>Preferência:</strong> ${order.requestMode === "quotes" ? "Receber propostas" : "Estimativa e propostas"}</p>
+          ${order.estimate ? `<p><strong>Faixa ilustrativa:</strong> ${escapeHtml(order.estimate.low.toLocaleString("pt-BR", {style:"currency",currency:"BRL",maximumFractionDigits:0}))} a ${escapeHtml(order.estimate.high.toLocaleString("pt-BR", {style:"currency",currency:"BRL",maximumFractionDigits:0}))}</p>` : ""}
           <p><strong>Criado em:</strong> ${escapeHtml(new Date(order.createdAt).toLocaleString("pt-BR"))}</p>
         </div>
         <span class="order-badge">Salvo neste aparelho</span>
@@ -55,11 +89,18 @@
     `).join("");
   }
 
+  [cargoInput, distanceInput, requestModeInput].forEach(input => {
+    input.addEventListener("input", calculateEstimate);
+    input.addEventListener("change", calculateEstimate);
+  });
+
   form.addEventListener("submit", event => {
     event.preventDefault();
     if (!form.reportValidity()) return;
 
     const data = new FormData(form);
+    const requestMode = String(data.get("requestMode") || "estimate_and_quotes");
+    const estimate = requestMode === "estimate_and_quotes" ? calculateEstimate() : null;
     const order = {
       id: (typeof crypto !== "undefined" && crypto.randomUUID)
         ? crypto.randomUUID()
@@ -67,9 +108,12 @@
       cargo: String(data.get("cargo") || "").trim(),
       origin: String(data.get("origin") || "").trim(),
       destination: String(data.get("destination") || "").trim(),
+      distance: Number(data.get("distance")),
       date: String(data.get("date") || ""),
       phone: String(data.get("phone") || "").trim(),
       details: String(data.get("details") || "").trim(),
+      requestMode,
+      estimate,
       createdAt: new Date().toISOString()
     };
 
@@ -77,9 +121,10 @@
       const orders = getOrders();
       orders.unshift(order);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-      message.textContent = "Pedido salvo neste navegador! Esta versão ainda não envia o pedido a profissionais.";
+      message.textContent = "Pedido salvo neste aparelho. Ainda não foi enviado a motoristas; a faixa de preço é apenas ilustrativa.";
       form.reset();
       dateInput.min = localToday;
+      estimatePanel.hidden = true;
       renderOrders();
       savedSection.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch {
