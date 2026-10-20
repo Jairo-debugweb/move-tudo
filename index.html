@@ -10,6 +10,7 @@
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
+  <script type="module" src="auth.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -33,6 +34,34 @@
         <div class="moving-box"><span class="box-tape"></span><span class="box-arrow">↑</span><span class="box-arrow second">↑</span></div>
         <div class="van"><div class="van-window"></div><div class="van-body-mark">MT</div><div class="wheel wheel-left"></div><div class="wheel wheel-right"></div></div>
         <div class="floating-tag tag-bottom"><span class="pin">⌖</span> Daqui para lá, sem complicação</div>
+      </div>
+    </section>
+
+
+    <section class="auth-section" id="conta">
+      <div class="auth-intro"><p class="eyebrow">SUA CONTA MOVE TUDO</p><h2>Cliente ou motorista?<br>Comece por aqui.</h2><p>Estamos preparando o cadastro compartilhado para que os pedidos possam conectar clientes e profissionais. O login só ficará ativo depois de configurar o projeto Supabase.</p></div>
+      <div class="auth-card">
+        <p id="auth-status" class="auth-status" role="status" aria-live="polite">Verificando configuração da conta…</p>
+        <div id="auth-forms" class="auth-forms">
+          <form id="signup-form" class="auth-form">
+            <h3>Criar conta</h3>
+            <label for="signup-name">Nome completo</label><input id="signup-name" name="full_name" autocomplete="name" required maxlength="100">
+            <label for="signup-phone">WhatsApp</label><input id="signup-phone" name="phone" type="tel" autocomplete="tel" required maxlength="30" placeholder="(34) 99999-9999">
+            <label for="signup-email">E-mail</label><input id="signup-email" name="email" type="email" autocomplete="email" required>
+            <label for="signup-role">Quero usar como</label><select id="signup-role" name="role" required><option value="client">Cliente — preciso de fretes</option><option value="driver">Motorista — quero oferecer fretes</option></select>
+            <label for="signup-password">Senha (mínimo 8 caracteres)</label><input id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+            <button class="button auth-submit" type="submit">Criar minha conta →</button>
+          </form>
+          <form id="login-form" class="auth-form">
+            <h3>Já tenho conta</h3>
+            <label for="login-email">E-mail</label><input id="login-email" name="email" type="email" autocomplete="email" required>
+            <label for="login-password">Senha</label><input id="login-password" name="password" type="password" autocomplete="current-password" required>
+            <button class="button auth-submit" type="submit">Entrar →</button>
+          </form>
+        </div>
+        <div id="account-panel" class="account-panel" hidden>
+          <span class="account-badge">CONTA CONECTADA</span><h3 id="account-name">Usuário</h3><p id="account-email"></p><p id="account-role"></p><button id="logout-button" class="text-button" type="button">Sair da conta</button>
+        </div>
       </div>
     </section>
 
